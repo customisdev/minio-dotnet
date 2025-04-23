@@ -80,9 +80,13 @@ public partial class MinioClient : IBucketOperations
             using var response =
                 await this.ExecuteTaskAsync(ResponseErrorHandlers, requestMessageBuilder,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
-            return response is not null &&
-                   (response.Exception is null ||
-                    response.Exception.GetType() != typeof(BucketNotFoundException));
+            if (response != null && response.Exception != null)
+                throw response.Exception; //Any exception should be considered a Not Found.
+            return response is not null;
+            //Any exception should be considered a not found
+            //return response is not null &&
+            //       (response.Exception is null ||
+            //        response.Exception.GetType() != typeof(BucketNotFoundException));
         }
         catch (InternalClientException ice)
         {
